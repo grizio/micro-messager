@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Micro-messager</title>
+    <link href="foundation.min.css" rel="stylesheet">
+    <style>
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+<div class="row">
+    <div class="small-12 columns">
+        <h1>Micro-messager</h1>
+
+        <div class="callout alert" id="errors">
+            <div class="row">
+                <h5 class="small-2 columns">Errors</h5>
+                <p id="errorsContent" class="small-8 columns"></p>
+                <div class="small-2 columns">
+                    <button id="errorClear" class="button inverse">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="init">
+            <form id="create">
+                <fieldset class="fieldset">
+                    <legend>Name your user</legend>
+
+                    <div class="input-group">
+                        <span class="input-group-label">Username</span>
+                        <input type="text" name="username" id="username"
+                               pattern="[a-zA-Z]+" placeholder="Letters only" required class="input-group-field">
+                        <div class="input-group-button">
+                            <input type="submit" class="button" value="Name it!">
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+
+        <div id="work">
+            <div class="row">
+                <div class="small-6 columns">
+                    <form id="send">
+                        <fieldset class="fieldset">
+                            <legend>New message</legend>
+
+                            <div class="row">
+                                <div class="small-3 columns">
+                                    <label for="message" class="text-right">Message</label>
+                                </div>
+                                <div class="small-9 columns">
+                                    <input type="text" name="message" id="message" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="small-3 columns">
+                                    <label for="message" class="text-right">Target user</label>
+                                </div>
+                                <div class="small-9 columns">
+                                    <input type="text" name="target" id="target">
+                                </div>
+                            </div>
+
+                            <input type="submit" value="send!" class="button primary">
+                        </fieldset>
+                    </form>
+                </div>
+
+                <div class="small-6 columns">
+                    <form id="subscribe">
+                        <fieldset class="fieldset">
+                            <legend>Subscribe</legend>
+
+                            <div class="input-group">
+                                <span class="input-group-label">Subscribe</span>
+                                <input type="text" name="target" id="targetSub" required class="input-group-field">
+                                <div class="input-group-button">
+                                    <input type="submit" class="button" value="Subscribe!">
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="small-6 columns">
+                    <h2>Received
+                        <button id="pull" class="button">Pull</button>
+                    </h2>
+                    <div id="received"></div>
+                </div>
+
+                <div class="small-6 columns">
+                    <h2>Sent
+                        <button id="pullSent" class="button">Pull sent</button>
+                    </h2>
+                    <div id="sent"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script src="script.js"></script>
+</body>
+</html>
