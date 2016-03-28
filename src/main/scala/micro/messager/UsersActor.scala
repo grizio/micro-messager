@@ -1,6 +1,11 @@
 package micro.messager
 
-import akka.actor.{Actor, ActorRef, Props}
+import java.util.concurrent.TimeUnit
+
+import akka.actor.SupervisorStrategy.{Escalate, Restart}
+import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props, SupervisorStrategy}
+
+import scala.concurrent.duration.FiniteDuration
 
 /**
  * This actor manages is the supervisor of all users.
@@ -30,6 +35,17 @@ object UsersActor {
 class UsersActor extends Actor {
 
   import UsersActor._
+
+  override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy(
+    maxNrOfRetries = 5,
+    withinTimeRange = FiniteDuration(1, TimeUnit.MINUTES),
+    loggingEnabled = true) {
+    case UserActor.BoomException(message) =>
+      context.actorSelection("*") ! UserActor.SupervisorMessage("A bomb was launched: " + message)
+      Restart // We restart the failed actor
+    case _: Exception =>
+      Escalate // We do not know this exception, we escalate to our supervisor
+  }
 
   override def receive: Receive = {
     case UsersActor.Create(username: String) =>

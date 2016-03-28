@@ -25,6 +25,9 @@ object UserActor {
   /** The actor subscribes to [[target]] actor */
   case class Subscribe(target: String) extends Action
 
+  /** This action is used for the supervisor to send a message to all actors. */
+  case class SupervisorMessage(message: String) extends Action
+
   /** (Internal use only) This action is used to accept a received [[message]] from [[source]]. */
   private case class Received(source: String, message: String) extends Action
 
@@ -36,6 +39,8 @@ object UserActor {
 
   /** The list of requested messages */
   case class Messages(messages: Seq[String]) extends Response
+
+  case class BoomException(message: String) extends RuntimeException
 
   /** This function is used to create the Actor with its username. */
   def props(username: String): Props = Props(new UserActor(username))
@@ -54,6 +59,11 @@ class UserActor(val username: String) extends Actor {
 
   /** List of subscribers */
   var subscribers = List[ActorRef]()
+
+  override def aroundPostRestart(reason: Throwable): Unit = {
+    // After restarting, we inform other that we are alive!
+    getUserActor("*") ! Received(username, "I'm alive!")
+  }
 
   override def receive: Receive = {
     // Public API
@@ -78,9 +88,16 @@ class UserActor(val username: String) extends Actor {
     case Subscribe(target) =>
       // Send the subscription to target actor
       getUserActor(target) ! Subscribed
+    case SupervisorMessage(message) =>
+      // We send a message to ourselves (self) with supervisor as source.
+      self ! Received("supervisor", message)
 
     // Private API
     case Received(source, message) =>
+      if (message.toLowerCase() == "boom") {
+        // A savage exception is thrown!
+        throw BoomException(s"$username was killed!")
+      }
       val savedMessage = s"[$source] $message"
       // We received a message, we save it.
       receivedMessages = savedMessage :: receivedMessages

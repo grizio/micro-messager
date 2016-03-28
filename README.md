@@ -33,6 +33,11 @@ Each item is a commit in this project.
 - [x] A user can fetch messages he received (messages until last time he fetch)
 - [x] A user can subscribe to another user and receive messages he globally send
 
+### Bonus
+
+When the received message is "boom", throws an exception.
+The supervisor will restart the failed actor and inform all other children actors.
+
 ## API
 
 Method | Url                          | Description
