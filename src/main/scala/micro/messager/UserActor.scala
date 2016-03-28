@@ -2,7 +2,6 @@ package micro.messager
 
 import akka.actor.{Actor, ActorSelection, Props}
 
-// TODO: defines its content
 object UserActor {
 
   /** This trait is used to describe all actions available for [[UserActor]]. */
@@ -13,6 +12,9 @@ object UserActor {
 
   /** This action is used to ask the actor to return the whole list of received messages. */
   case object Pull extends Action
+
+  /** This action is used to ask the actor to return the whole list of sent messages. */
+  case object Sent extends Action
 
   /** (Internal use only) This action is used to accept a received [[message]] from [[source]]. */
   private case class Received(source: String, message: String) extends Action
@@ -33,14 +35,20 @@ class UserActor(val username: String) extends Actor {
 
   var receivedMessages = List[String]()
 
+  var sentMessages = List[String]()
+
   override def receive: Receive = {
     // Public API
     case SendToUser(target, message) =>
       // We send the message to the targeted actor
       getUserActor(target) ! Received(username, message)
+      sentMessages = s"[$username] $message" :: sentMessages
     case Pull =>
       // We send the whole list of received messages
       sender ! Messages(receivedMessages)
+    case Sent =>
+      // We send the whole list of sent messages
+      sender ! Messages(sentMessages)
 
     // Private API
     case Received(source, message) =>

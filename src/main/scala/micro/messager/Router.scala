@@ -20,6 +20,7 @@ object Router {
     createUserRoute ~
       sendMessageToUserRoute ~
       pullReceivedMessages ~
+      pullSentMessages ~
       uiRoute
 
   /**
@@ -111,6 +112,34 @@ object Router {
             // You can use libraries to transform into JSON or XML or other.
             // See http://doc.akka.io/docs/akka/2.4.2/scala/http/common/json-support.html
             (userPath(currentUsername) ? UserActor.Pull).mapTo[UserActor.Response].map(_.toString)
+          }
+        }
+      }
+    }
+
+  /**
+   * Returns the route used to pull sent messages
+   * {{{
+   * request:
+   * | GET /<user>/sent [no body]
+   * response:
+   * | 200 <Messages(List[String])>
+   * }}}
+   */
+  def pullSentMessages(implicit system: ActorSystem, ec: ExecutionContext) =
+  // request: path = /<user>
+    pathPrefix(Segment) { currentUsername =>
+      // request: path = /<user>/sent
+      path("sent") {
+        // request: GET /<user>/sent
+        get {
+          // Complete the route with nested result
+          complete {
+            // We ask the whole list of sent messages
+            // It will be our response (converted to simple string in this project).
+            // You can use libraries to transform into JSON or XML or other.
+            // See http://doc.akka.io/docs/akka/2.4.2/scala/http/common/json-support.html
+            (userPath(currentUsername) ? UserActor.Sent).mapTo[UserActor.Response].map(_.toString)
           }
         }
       }
