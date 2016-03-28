@@ -32,3 +32,27 @@ Each item is a commit in this project.
 - [ ] A user can pull messages he sent
 - [ ] A user can fetch messages he received (messages until last time he fetch)
 - [ ] A user can subscribe to another user and receive messages he globally send
+
+## API
+
+Method | Url                          | Description
+---    | ---                          | ---
+`POST` | `/users/<username>`          | Creates the user with given `username` if not exist (no body)
+`POST` | `/<user>/send/<target>`      | From user `user`, sends a message to `target` user (string body)
+`GET`  | `/<user>/pull`               | Pulls all messages the user received
+`GET`  | `/<user>/sent`               | Pulls all messages the user sent
+`GET`  | `/<user>/fetch`              | Fetches messages the user received until last fetch
+`POST` | `/<user>/subscribe/<target>` | Subscribes to `target` to receive messages he sends globally (no body)
+`POST` | `<user>/send`                | Sends a message globally (string body)
+
+## Actor hierarchy
+
+```
+/                 # reserved to akka
+  system          # reserved to akka
+  user            # reserved to akka
+    users         # Supervisor of all users
+      <username1> # User <username1>
+      <username2> # User <username2>
+      ...
+```
