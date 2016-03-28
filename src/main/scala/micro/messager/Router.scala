@@ -13,10 +13,12 @@ import scala.concurrent.ExecutionContext
 object Router {
   implicit val timeout = Timeout(1, TimeUnit.SECONDS)
 
+  /** Helper to get the Actor reference in terms of its username. */
   def userPath(username: String)(implicit system: ActorSystem) = system.actorSelection(s"user/users/$username")
 
   def route(implicit system: ActorSystem, ec: ExecutionContext) =
     createUserRoute ~
+      sendMessageToUserRoute ~
       uiRoute
 
   /**
@@ -48,6 +50,28 @@ object Router {
               case UsersActor.Existing =>
                 // The user already existed, we return a BadRequest
                 HttpResponse(StatusCodes.BadRequest, entity = "existing user")
+            }
+          }
+        }
+      }
+    }
+
+  def sendMessageToUserRoute(implicit system: ActorSystem, ec: ExecutionContext) =
+  // request: path = /<user>
+    pathPrefix(Segment) { currentUsername =>
+      // request: path = /<user>/send
+      pathPrefix("send") {
+        // request: path = /<user>/send/<target>
+        path(Segment) { username =>
+          // request: POST /<user>/send/<target>
+          post {
+            // Body as String
+            entity(as[String]) { message =>
+              // We send the message to the actor
+              // Usage of "fire and forget", so we do not know if the message arrive (design choice)
+              userPath(currentUsername) ! UserActor.SendToUser(username, message)
+              // Always complete with OK
+              complete("OK")
             }
           }
         }
