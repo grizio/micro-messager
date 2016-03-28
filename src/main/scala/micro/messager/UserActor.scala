@@ -11,8 +11,17 @@ object UserActor {
   /** This action is used to send the [[message]] to the [[target]]. */
   case class SendToUser(target: String, message: String) extends Action
 
+  /** This action is used to ask the actor to return the whole list of received messages. */
+  case object Pull extends Action
+
   /** (Internal use only) This action is used to accept a received [[message]] from [[source]]. */
   private case class Received(source: String, message: String) extends Action
+
+  /** This trait is used to describe all responses returnable by [[UserActor]]. */
+  sealed trait Response
+
+  /** The list of requested messages */
+  case class Messages(messages: Seq[String]) extends Response
 
   /** This function is used to create the Actor with its username. */
   def props(username: String): Props = Props(new UserActor(username))
@@ -25,9 +34,15 @@ class UserActor(val username: String) extends Actor {
   var receivedMessages = List[String]()
 
   override def receive: Receive = {
+    // Public API
     case SendToUser(target, message) =>
       // We send the message to the targeted actor
       getUserActor(target) ! Received(username, message)
+    case Pull =>
+      // We send the whole list of received messages
+      sender ! Messages(receivedMessages)
+
+    // Private API
     case Received(source, message) =>
       // We received a message, we save it.
       receivedMessages = s"[$source] $message" :: receivedMessages

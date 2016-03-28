@@ -28,7 +28,7 @@ Each item is a commit in this project.
 - [x] Creates the base (Boot, Router)
 - [x] It is possible to create a new user if it does not exist
 - [x] A user can send a message to another user
-- [ ] A user can pull messages he received (all messages)
+- [x] A user can pull messages he received (all messages)
 - [ ] A user can pull messages he sent
 - [ ] A user can fetch messages he received (messages until last time he fetch)
 - [ ] A user can subscribe to another user and receive messages he globally send
