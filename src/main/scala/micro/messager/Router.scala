@@ -19,9 +19,11 @@ object Router {
   def route(implicit system: ActorSystem, ec: ExecutionContext) =
     createUserRoute ~
       sendMessageToUserRoute ~
+      sendMessageRoute ~
       pullReceivedMessages ~
       fetchReceivedMessages ~
       pullSentMessages ~
+      subscribeRoute ~
       uiRoute
 
   /**
@@ -82,6 +84,37 @@ object Router {
               // We send the message to the actor
               // Usage of "fire and forget", so we do not know if the message arrive (design choice)
               userPath(currentUsername) ! UserActor.SendToUser(username, message)
+              // Always complete with OK
+              complete("OK")
+            }
+          }
+        }
+      }
+    }
+
+  /**
+   * Returns the route used to send a message to all subscribers.
+   * {{{
+   * request:
+   * | POST /<user>/send [String body]
+   * response:
+   * | 200 OK
+   * }}}
+   */
+  def sendMessageRoute(implicit system: ActorSystem, ec: ExecutionContext) =
+  // request: path = /<user>
+    pathPrefix(Segment) { currentUsername =>
+      // request: path = /<user>/send
+      pathPrefix("send") {
+        // We avoid conflict with sendMessageToUserRoute by indicating the end of the route
+        pathEndOrSingleSlash {
+          // request: POST /<user>/send
+          post {
+            // Body as String
+            entity(as[String]) { message =>
+              // We send the message to the actor
+              // Usage of "fire and forget", so we do not know if the message arrive (design choice)
+              userPath(currentUsername) ! UserActor.Send(message)
               // Always complete with OK
               complete("OK")
             }
@@ -169,6 +202,34 @@ object Router {
             // You can use libraries to transform into JSON or XML or other.
             // See http://doc.akka.io/docs/akka/2.4.2/scala/http/common/json-support.html
             (userPath(currentUsername) ? UserActor.Sent).mapTo[UserActor.Response].map(_.toString)
+          }
+        }
+      }
+    }
+
+  /**
+   * Returns the route used to subscribe to another user.
+   * {{{
+   * request:
+   * | POST /<user>/subscribe/<target> [no body]
+   * response:
+   * | 200 OK
+   * }}}
+   */
+  def subscribeRoute(implicit system: ActorSystem, ec: ExecutionContext) =
+  // request: path = /<user>
+    pathPrefix(Segment) { currentUsername =>
+      // request: path = /<user>/subscribe
+      pathPrefix("subscribe") {
+        // request: path = /<user>/subscribe/<target>
+        path(Segment) { target =>
+          // request: POST /<user>/subscribe/<target>
+          post {
+            // We send the subscription to the actor
+            // Usage of "fire and forget", so we do not know if the message arrive (design choice)
+            userPath(currentUsername) ! UserActor.Subscribe(target)
+            // Always complete with OK
+            complete("OK")
           }
         }
       }
