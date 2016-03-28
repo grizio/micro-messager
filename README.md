@@ -30,7 +30,7 @@ Each item is a commit in this project.
 - [x] A user can send a message to another user
 - [x] A user can pull messages he received (all messages)
 - [x] A user can pull messages he sent
-- [ ] A user can fetch messages he received (messages until last time he fetch)
+- [x] A user can fetch messages he received (messages until last time he fetch)
 - [ ] A user can subscribe to another user and receive messages he globally send
 
 ## API

@@ -13,6 +13,9 @@ object UserActor {
   /** This action is used to ask the actor to return the whole list of received messages. */
   case object Pull extends Action
 
+  /** This action is used to ask the actor to return the whole list of received messages until last fetch. */
+  case object Fetch extends Action
+
   /** This action is used to ask the actor to return the whole list of sent messages. */
   case object Sent extends Action
 
@@ -35,6 +38,9 @@ class UserActor(val username: String) extends Actor {
 
   var receivedMessages = List[String]()
 
+  /** This list contains only messages until last fetch request. */
+  var messagesToFetch = List[String]()
+
   var sentMessages = List[String]()
 
   override def receive: Receive = {
@@ -46,14 +52,20 @@ class UserActor(val username: String) extends Actor {
     case Pull =>
       // We send the whole list of received messages
       sender ! Messages(receivedMessages)
+    case Fetch =>
+      sender ! Messages(messagesToFetch)
+      messagesToFetch = List()
     case Sent =>
       // We send the whole list of sent messages
       sender ! Messages(sentMessages)
 
     // Private API
     case Received(source, message) =>
+      val savedMessage = s"[$source] $message"
       // We received a message, we save it.
-      receivedMessages = s"[$source] $message" :: receivedMessages
+      receivedMessages = savedMessage :: receivedMessages
+      // We also save it into the list of messages to fetch (see property documentation)
+      messagesToFetch = savedMessage :: messagesToFetch
   }
 
   // Because we never use this actor directly, but always pass by receive,
