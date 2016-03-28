@@ -32,6 +32,10 @@
         if (xhr.status == 200) {
           nodeInit.classList.add("hidden");
           nodeWork.classList.remove("hidden");
+        } else if (xhr.status == 400) {
+          showError(xhr.responseText);
+          nodeInit.classList.add("hidden");
+          nodeWork.classList.remove("hidden");
         } else {
           showError(xhr.responseText);
         }

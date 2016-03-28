@@ -26,7 +26,7 @@ This part lists the work to do during the project.
 Each item is a commit in this project.
 
 - [x] Creates the base (Boot, Router)
-- [ ] It is possible to create a new user if it does not exist
+- [x] It is possible to create a new user if it does not exist
 - [ ] A user can send a message to another user
 - [ ] A user can pull messages he received (all messages)
 - [ ] A user can pull messages he sent

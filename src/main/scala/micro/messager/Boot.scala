@@ -9,5 +9,8 @@ object Boot extends App {
   implicit val materializer = ActorMaterializer()
   implicit val dispatcher = system.dispatcher
 
+  // Creates the main actor UsersActor
+  system.actorOf(UsersActor.props, "users")
+
   Http().bindAndHandle(Router.route, "localhost", 8080)
 }
